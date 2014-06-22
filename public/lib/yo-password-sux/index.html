@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Password Tester</title>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="/lib/sha512.js"></script>
+	</head>
+	<body class="not-loaded not-logged-in">
+		<h1>Password Tester</h1>
+		<p>
+			So this is like another website asking for a password. You'll try to think of something you can remember... <br>
+			Maybe you'll use a password you used for another site. Yeah, you would do that, wouldn't you?
+		</p>
+		<form id="login" action="login" target="dummy">
+			<h3>Login / Create Account</h3>
+			<input id="username" placeholder="username" name="username" type="text" autofocus/><br>
+			<input id="password" placeholder="password" name="password" type="password"/><br>
+			<input type="submit" value="Login"/>
+		</form>
+		<p id="response"></p>
+		<pre id="output"></pre>
+		<style>
+			big { font-size: 2em; }
+			huge { font-size: 4em; }
+		</style>
+		<script>
+			var mindBogglinglyTerriblePasswords = "password 123456 12345678 abc123 qwerty monkey letmein dragon 111111 baseball iloveyou trustno1 1234567 sunshine master 123123 welcome shadow ashley football jesus michael ninja mustang";
+			var $response = $("#response");
+			var $output = $("#output");
+			var $password = $("#password");
+			var after = function(t,f){
+				setTimeout(f,t);
+			};
+			var clear = function(f){
+				$password.val(function(i,s){
+					return s.substring(0, s.length - 1);
+				});
+				if($password.val() === ""){
+					f();
+				}else{
+					after(500,function(){clear(f);});
+				}
+			};
+			var commonPasswords = [];
+			$("form").submit(function(e){
+				e.preventDefault();
+				var password = $password.val();
+				if(password == "password" || password == "123456"){
+					//FUCK NO
+					$response.html("haha");
+					after(1000,function(){
+						$response.append("<br>very funny");
+						after(2000,function(){
+							$response.append("<br>You're joking.");
+							after(1300,function(){
+								$response.append("<br>Right?");
+								after(2000,function(){
+									$response.append("<br><b>RIGHT?</b>");
+									after(2000,function(){
+										$response.append("<br><b><big>JESUS</big></b>");
+										after(2000,function(){
+											$response.append("<br><b><huge>FUCK</huge></b>");
+											after(800,function(){
+												//$response.append("<b><huge> NO</huge></b>");
+												clear(function(){
+													after(800,function(){
+														$response.html("Let's try this again.");
+													});
+												});
+											});
+										});
+									});
+								});
+							});
+						});
+					});
+				}else if(mindBogglinglyTerriblePasswords.indexOf(password) !== -1){
+					//seriously?
+					$response.html("Okay, let me guess.");
+					after(1000,function(){
+						$response.append('<br>Is it "password"?');
+						after(2000,function(){
+							$response.append('<br>Is it "123456"?');
+							after(2000,function(){
+								$response.append('<br>How about "'+password+'"?');
+								after(2000,function(){
+									$response.append("<br>That's it? Wow. Um, how about DON'T use that?");
+									after(2000,function(){
+										clear(function(){
+											after(2000,function(){
+												$response.html("Let's try this again.");
+											});
+										});
+									});
+								});
+							});
+						});
+					});
+				}else if(password.length < 7){
+					//bad
+					$response.html("That's too short. (Here's why:)");
+					after(1000,function(){
+						$response.append('<br>Let me guess...');
+						after(2000,function(){
+							var lines = [];
+							for(var i=0;i<10;i++){
+								lines.push($("<div>").appendTo($output));
+							}
+							var str = "";
+							var stack = [["",0]];
+							var c = 0;
+							var chrs = "qwertyuiopasdfghjklzxcvbnm1234567890";
+							setInterval(function(){
+								stack[stack.length-1][1]++;
+								if(stack[stack.length-1][1]>chrs.length){
+									if(stack[stack.length-1][1]){
+										
+									}
+									return;
+								}
+								var s = String.fromCharCode(c);
+								
+							});
+						});
+					});
+				}else if(password.length < 7){
+					$response.html("That's too short. But I don't feel like cracking it because it contains non-alpha-numeric characters. That wouldn't be a problem for a legit hacker, though.");
+						
+				}else if(
+					password.match(/\w{4,}/) && 
+					((password.match(/\ .* .* /) && password.length>10)
+					||(password.match(/\ .* /) && password.length>12))
+				){
+					//good
+					$response.html("That's actually pretty good.");
+					after(2000,function(){
+						$response.append('<br>For you.');
+						after(2000,function(){
+							$response.append('<br>I guess.');
+						});
+					});
+				}else if(password.length < 9){
+					//bad
+					$response.html("That's kinda short.");
+					after(1000,function(){
+						$response.append('<br>If I had a decent computer I could probably hack your account, if the website has poor security, at least.');
+					});
+				}else{
+					//bad
+					$response.html("Eh. It's not great.");
+				}
+				
+			});
+			/*$.get("passwords.txt",function(data){
+				commonPasswords = data.split("\n");
+				console.log(commonPasswords.length);
+			});*/
+		</script>
+	</body>
+</html>

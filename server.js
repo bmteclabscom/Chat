@@ -1,159 +1,369 @@
-#!/bin/env node
-//  OpenShift sample Node application
-var express = require('express');
-var fs      = require('fs');
+/*
+Console commands: 
+> update
+> force update
+> :alert("eval");
+> javascript: function style(css){var s=document.createElement("style");s.textContent=css;document.head.appendChild(s);} function animate(selector,from,to){var name="a"+Math.floor(Math.random()*5000000)+Math.floor(Math.random()*50000);style("@-webkit-keyframes "+name+"{0%{"+from+"}50%{"+to+"}100%{"+from+"}}"+selector+"{-webkit-animation:"+name+" 5s infinite;position:relative}");} animate( ":root", "-webkit-filter:saturate(10)contrast(440%)blur(0px)", "-webkit-filter:saturate(1)contrast(100%)blur(3px)" );
+*/
+console.log("Chat Server v0.0.1.1");
+
+var fs = require('fs');
+if(!fs.existsSync){
+	console.log("No fs.existsSync? Upgrade Node.");
+	console.log(process.versions);
+	process.exit(1);
+}
 
 
-/**
- *  Define the sample application.
- */
-var SampleApp = function() {
-
-    //  Scope.
-    var self = this;
+var webserver = require("./webserver")({some:function(s){maybe;}});
+var crypto = require('crypto');
 
 
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
+var mode = parseInt("770",8);
+//try {
+	if(!fs.existsSync('db')){fs.mkdirSync('db',mode);}
+	if(!fs.existsSync('db/users')){fs.mkdirSync('db/users',mode);}
+//}catch(e){
+	//console.log(e.code);
+	//throw e;
+//}
 
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
-    self.setupVariables = function() {
-        //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-
-        if (typeof self.ipaddress === "undefined") {
-            //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-            //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            self.ipaddress = "127.0.0.1";
-        };
-    };
-
-
-    /**
-     *  Populate the cache.
-     */
-    self.populateCache = function() {
-        if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
-        }
-
-        //  Local cache for static content.
-        self.zcache['index.html'] = fs.readFileSync('./index.html');
-    };
-
-
-    /**
-     *  Retrieve entry (content) from cache.
-     *  @param {string} key  Key identifying content to retrieve from cache.
-     */
-    self.cache_get = function(key) { return self.zcache[key]; };
-
-
-    /**
-     *  terminator === the termination handler
-     *  Terminate server on receipt of the specified signal.
-     *  @param {string} sig  Signal to terminate on.
-     */
-    self.terminator = function(sig){
-        if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
-           process.exit(1);
-        }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
-    };
-
-
-    /**
-     *  Setup termination handlers (for exit and a list of signals).
-     */
-    self.setupTerminationHandlers = function(){
-        //  Process on exit and signals.
-        process.on('exit', function() { self.terminator(); });
-
-        // Removed 'SIGPIPE' from the list - bugz 852598.
-        ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-         'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
-            process.on(element, function() { self.terminator(element); });
-        });
-    };
-
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
-    self.createRoutes = function() {
-        self.routes = { };
-
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
-        };
-
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
-    };
-
-
-    /**
-     *  Initialize the server (express) and create the routes and register
-     *  the handlers.
-     */
-    self.initializeServer = function() {
-        self.createRoutes();
-        self.app = express.createServer();
-
-        //  Add handlers for the app (from the routes).
-        for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
-        }
-    };
-
-
-    /**
-     *  Initializes the sample application.
-     */
-    self.initialize = function() {
-        self.setupVariables();
-        self.populateCache();
-        self.setupTerminationHandlers();
-
-        // Create the express server and routes.
-        self.initializeServer();
-    };
-
-
-    /**
-     *  Start the server (starts up the sample application).
-     */
-    self.start = function() {
-        //  Start the app on the specific interface (and port).
-        self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
-        });
-    };
-
-};   /*  Sample Application.  */
+main();
 
 
 
-/**
- *  main():  Main code.
- */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
 
+
+function main(){
+	
+	var io = require('socket.io').listen(2998, {secure: true});
+	
+	/*io.enable('browser client minification');
+	io.enable('browser client etag');
+	io.enable('browser client gzip');
+	io.set('log level', 1);*/
+	io.set('transports', [
+		'websocket',
+		'flashsocket',
+		'htmlfile',
+		'xhr-polling',
+		'jsonp-polling'
+	]);
+	
+	var bot = new require("cleverbot")();
+	var online = {};
+	io.sockets.on('connection', function(socket) {
+		
+		var publicKey;
+		var generatePublicKey = function(){
+			crypto.randomBytes(48, function(ex, buf){
+				publicKey = buf.toString('base64');
+				socket.emit("public-key",publicKey);
+				console.log("public-key",publicKey);
+			});
+		};
+		generatePublicKey();
+		
+		// Keep track of the user associated with this socket
+		var user = {
+			socket: socket,
+			logout: function(){
+				if(user.uname){
+					socket.broadcast.emit("someone-logged-out",{
+						uname: user.uname
+					});
+					delete online[user.uname];
+				}else{
+					console.log("debug: logout with no uname");
+				}
+				publicKey = null; //invalidate publicKey;
+			},
+			disconnect: function(){
+				console.log("debug: disconnect, uname="+user.uname);
+				delete online[user.uname];
+				publicKey = null; //invalidate publicKey;			
+			},
+			/* added on login *\
+			uname: "username",
+			\*                */
+		};
+		
+		socket.on('logout', user.logout);
+		socket.on('disconnect', user.disconnect);
+	
+		socket.on('create-account', function(data) {
+			if(badArgs(data,{
+				uname: "username",
+				pash: "3ncryp73d_p4ssw0rd",
+			})) return socket.emit('login-failed', {message:"Data fail."});
+			
+			if(data.uname.length<4){
+				return socket.emit('login-failed', {message:'Username is too short. The minimum is 4 characters.'});
+			}
+			if(data.uname.match(/[\[\/\\{<"'#@(*)>}\]]/gim)){
+				return socket.emit('login-failed', {message:'Username cannot contain any of \\ / [ { < " \' # @ ( ) * > } ]'});
+			}
+			for(var i in online){
+				var u = online[i];
+				if(u.socket == socket){
+					return socket.emit('login-failed', {message:"You're already logged in."+u+","+socket});
+				}
+			}
+			fs.exists('db/users/'+data.uname,function(exists){
+				if(exists){
+					//console.debug("user folder exists");
+					return socket.emit('login-failed', {message:'That username already exists.'});
+				}else{
+					fs.mkdir('db/users/'+data.uname,mode,function(){
+						user.uname = data.uname;
+						data.pash = hash(data.pash,data.uname);
+						//user.firstName = data.firstName;
+						//user.lastName = data.lastName;
+						user.timeAccountCreated = data.timeAccountCreated = 
+						user.timeLastLoggedIn = data.timeLastLoggedIn = +new Date();
+						
+						fs.writeFile('db/users/'+data.uname+'/user.json', JSON.stringify(data), function(err,fd){
+							if(err){
+								console.warn("writeFile "+'db/users/'+data.uname+'/user.json failed!');
+								return socket.emit('login-failed', {message:'Filesystem error!'});
+							}
+							//"just to be safe", don't broadcast the password to every freaking person yh k
+							delete data.pash;
+							//
+							socket.broadcast.emit('logged-in', data);
+							data.isme = true;
+							socket.emit('logged-in', data);
+							sendUsers();
+						});
+					});
+				}
+			});
+			//console.log("unknown error");
+			//socket.emit('login-failed', {message:'unknown error'});
+		});
+	
+		socket.on('login', function(data) {
+			if(badArgs(data,{
+				uname: "username",
+				pash: "encrypted password"
+			})) return socket.emit('login-failed', {message:"Data fail."});
+			
+			//console.log(data.uname+' is attempting to log in...');
+			// When logs in, dump logs? or use REST?
+			if(online[data.uname]){
+				return socket.emit('login-failed', {message:data.uname+" is already logged in."});
+			}
+			for(var i in online){
+				var u = online[i];
+				if(u.socket == socket){
+					return socket.emit('login-failed', {message:"You're already logged in as "+u.uname});
+				}
+			}
+			if(data.uname.length<4){
+				return socket.emit('login-failed', {message:'Username is too short. The minimum is 4 characters.'});
+			}
+			if(data.uname.match(/[\[\/\\{<"'#@(*)>}\]]/gim)){
+				return socket.emit('login-failed', {message:'Username cannot contain any of \\ / [ { < " \' # @ ( ) * > } ]'});
+			}
+			fs.exists('db/users/'+data.uname,function(exists){
+				if(!exists){
+					return socket.emit('login-failed', {message:'User doesn\'t exist.'});
+				}else{
+					fs.readFile('db/users/'+data.uname+"/user.json",function(err,json){
+						if(err){
+							console.warn("readFile "+'db/users/'+data.uname+'/user.json failed');
+							return socket.emit('login-failed', {message:'Filesystem error!'});
+						}
+						try {
+							var jso = JSON.parse(json);
+							if(jso.pash == hash(data.pash,data.uname)){
+								
+								user.uname = data.uname;
+								online[user.uname] = user;
+								user.timeLastLoggedIn = data.timeLastLoggedIn = +new Date();
+								//console.log(data.uname+' logged in.');
+								//data.timeStamp = new Date();
+								
+								// make sure not to broadcast the password
+								delete data.pash;
+								// Broadcast that client has logged in
+								// (this should only go to friends)
+								socket.broadcast.emit('someone-logged-in', data);
+								data.settings = jso.settings;
+								socket.emit('logged-in', data);
+								sendUsers();
+							}else{
+								//console.log("incorrect password");
+								socket.emit('login-failed', {message:'Incorrect password.'});
+							}
+						}catch(e){
+							console.error('parse "db/users/'+data.uname+'/user.json" failed...',e.message);
+							socket.emit('login-failed', {message:'JSON.parse() error!'});
+						}
+					});
+				}
+			});
+		});
+		
+		function sendUsers(){
+			//so far just sends a list of all online users
+			var onlines = [];
+			for(var i in online){
+				var u = online[i];
+				if(u !== user && (!!/*is friend*/11)){
+					onlines.push({
+						uname: u.uname,
+						online: true,
+					});
+				}
+			}
+			//and bots, of course
+			onlines.push({
+				uname: "@feedback",
+				name: "Send Feedback"
+			});
+			onlines.push({
+				uname: "@cleverbot",
+				name: "CleverBot"
+			});
+			socket.emit('users',onlines);
+		}
+		
+		socket.on('im', function(data){
+			if(badArgs(data,{
+				to: "username",
+				message: "sup bro",
+			})) return;
+			
+			data.from = user.uname;
+			data.time = +new Date();
+			
+			if(data.to.match(/^@bot-/)){
+				if(data.message.match(/ping/gmi)){
+					socket.emit("im",{from:data.to,message:"SAUASUHUHASUHASUH"});
+				}else{
+					for(var i=0;i<3;i+=1+(Math.random()<0.5)){
+						socket.emit("im",{from:"@bot-"+i,message:Math.random()<0.01?"SAUASUHUHASUHASUH":"HELLO THERE HUMAN"});
+					}
+				}
+			}else if(data.to==="@cleverbot"){
+				bot.think(data.message,function(err,res){
+					socket.emit("im",{from:data.to,message:res||err});
+				});
+			}else if(data.to==="@feedback"){
+				fs.appendFile(
+					"FEEDBACK",
+					"\u2029[:"+data.from+"@"+data.time+":]\n"+data.message.replace(/\u2029/g,'')+"\n",
+					function(err){
+						if(err)console.error("feedback log error!",err);
+					}
+				);
+				if(online["1j01"]){
+					data.from += "#feedback";
+					online["1j01"].socket.emit('im', data);
+				}
+				//thxprops
+				socket.emit("im",{from:"@feedback",message:"Thanks for your feedback probably!"});
+			}else{
+				// Pass it on.
+				if(online[data.to]){
+					online[data.to].socket.emit('im', data);
+					//console.log(user.uname+' said "'+data.message+'" to '+data.to);
+				}else{
+					//console.log(user.uname+' tried to say "'+data.message+'" to '+data.to+', but '+data.to+" isn't online and logs aren't implemented. :(");
+				}
+				// Add the message to the log(s).
+				fs.exists('db/users/'+data.to,function(exists){
+					if(!exists){
+						console.log("user does not exist:",data.to);
+					}else{
+						fs.appendFile(
+							'db/users/'+data.to+"/"+data.from+".chat",
+							"\u2029[:"+data.from+"@"+data.time+":]\n"+data.message.replace(/\u2029/g,'')+"\n",
+							function(err){
+								if(err)console.error("log error!",err);
+							}
+						);
+					}
+				});
+			}
+		});
+		
+	});
+	
+	/*module.exports = {
+		login: function(){
+			
+		},
+		
+	};*/
+	
+	function badArgs(data,struct){
+		if(typeof data !== typeof struct){
+			console.error("TypeError: "+JSON.stringify(data)+" !=> "+typeof struct+" ("+JSON.stringify(struct)+")");
+			return true;
+		}
+		if(typeof data === "object"){
+			for(var k in struct){
+				if(badArgs(data[k],struct[k])) return true;
+			}
+		}
+		if(typeof data === "array"){
+			for(var i in data){
+				if(badArgs(data[i],struct[0])) return true;
+			}
+		}
+		return false;
+	}
+	
+	var stdin = process.openStdin();
+	//process.stdin.setEncoding('utf8');
+	stdin.on('data', function(chunk) {
+		var line = (chunk+"").trim();
+		if(!line) return;
+		if(line.match(/^(?:javascript)?:/)){
+			var js = line.replace(/^(?:javascript)?:/,"").trim();
+			io.sockets.emit("eval",js);
+			console.log("broadcast eval()");
+		}else if(line.match(/^force[ \-]?update:?/)){
+			var msg = line.replace(/^force[ \-]?update:?/,"").trim() || "There's an update. The page will be reloaded.";
+			var js = ("("+function(){
+				setInterval(function(){
+					var go=!windowActive,$$i=$$(".input.message");
+					for(i=0;i<$$i.length;i++){
+						if($$i[i].innerHTML.match(/\S/)){go=0;}
+					}
+					if(go){
+						location.reload();
+					}
+				},5000);
+			}+")()");
+			io.sockets.emit("eval",js);
+			console.log("page update forced");
+		}else if(line.match(/^update:?/)){
+			var msg = line.replace(/^update:?/,"").trim() || "There's an update! Reload maybe?";
+			var js = ("("+function(){
+				var $not = document.createElement("div");
+				$not.innerHTML = msg;
+				$("#notifications").appendChild($not);
+				$not.onclick = function(){
+					location.reload();
+				};
+				$not.style.cursor = "pointer";
+			}+")()").replace("msg",'"'+msg+'"');
+			io.sockets.emit("eval",js);
+			console.log("sent update notification");
+		}else{
+			console.log("invalid command");
+		}
+	});
+
+	function hash(str,moresalt){
+		return crypto
+			.createHash('sha512')
+			.update(
+				"egassem+sdrawkcab_atlas"+str+"e_z"+moresalt+"_yay1337funtoo#toomuchsalt"+str.toUpperCase()+
+				"http://img2.timeinc.net/health/images/slides/to-much-salt-400x400.jpg"//note: too, not to (is importnat)
+			).digest('hex');
+	}
+};
