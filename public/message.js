@@ -4,12 +4,12 @@
 	var TEXT_NODE = 3;
 	
 	var $VideoEmbed = function($e, ur$l){
-		var $el = $("<iframe class='video'/>");
-		$el.attr({
-			width: $e.attr("width")||640,
-			height: $e.attr("height")||480,
+		var $ve = $("<iframe class='video'/>");
+		$ve.attr({
+			width: $e.attr("width") || 640,
+			height: $e.attr("height") || 480,
 			allowfullscreen: true,
-			src: ur$l.replace("$vid",encodeURIComponent($e.attr("vid")))
+			src: ur$l.replace("$vid", encodeURIComponent($ve.attr("vid")))
 		});
 		return $el;
 	};
@@ -60,10 +60,10 @@
 			$contents.each(function(){
 				var $n = $(this);
 				if(this.nodeType === TEXT_NODE){
-					//$n is a $#text node
+					//$n is a $(#text node)
 					$into.append($n.clone());
 				}else if(this.nodeType === ELEMENT_NODE){
-					//$n is an $el
+					//$n is an $element
 					var $newel;
 					var nn = this.nodeName.toLowerCase();
 					if(/^([quibasp]|strike|strong|em|ins|del|sub|sup|span|div|img|h[123456r]|pre|blockquote|[ou]l|li|code|var|samp|kbd|w?br)$/.exec(nn)){
