@@ -4,10 +4,10 @@
 	var kkeys = [];
 	$(window).on("keydown", function(e){ 
 		kkeys.push(e.keyCode); 
-        if(kkeys.toString().indexOf("38,38,40,40,37,39,37,39,66,65") >= 0){
-            kcEntered(kkeys=[]);
+		if(kkeys.toString().indexOf("38,38,40,40,37,39,37,39,66,65") >= 0){
+			kcEntered(kkeys=[]);
 		}
-    });
+	});
 	
 	var kcfs = [filter,shady,woop,shady,woop,wooop,candles,yticy,rec,tol];
 	function kcEntered(){
@@ -83,7 +83,7 @@
 				var w = $img[0].naturalWidth||64;
 				var h = $img[0].naturalHeight||64;
 				var s = {
-					x:Math.random()*(innerWidth+w)  - Math.random()*w,
+					x:Math.random()*(innerWidth +w) - Math.random()*w,
 					y:Math.random()*(innerHeight+h) - Math.random()*h,
 					xs:Math.random()*10-5,
 					ys:Math.random()*10-5,

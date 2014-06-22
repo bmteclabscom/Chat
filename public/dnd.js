@@ -1,5 +1,5 @@
 /* Cross Browser Support */
-var requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+var requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 var BlobBuilder = window.WebKitBlobBuilder || window.MozBlobBuilder;
 var URL = window.URL || window.webkitURL;
 
@@ -14,7 +14,7 @@ $(function(){
 		if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files && e.originalEvent.dataTransfer.files.length){
 			stopEvent(e);
 		}
-    });
+	});
 });
 
 $.fn.dnd = function(){
@@ -37,37 +37,37 @@ function DnD($e,o){
 		}
 		stopEvent(e);
 		
-        // get list of dropped files (||fail silently)
-        var files = e.originalEvent.dataTransfer.files||[];
-        // amount of dropped files
-        var count = files.length;
-        
-        // One file at least neccessary to continue
-        if(count > 0){
-            
-        }
-    });
-    /*
-    function handleFiles(files, masterObj){
-        // handle only the first file (no multifile support) 
-        var file = files[0];
-        // create the reader to access the local file (note: browser have different security restrictions) 
-        var reader = new FileReader();
-        
-        // init the reader event handlers
-        reader.onload = function(e){
-            var arrayBuffer = e.target.result;
-            var arr = new Uint8Array(arrayBuffer);
-            // do something with array?
-        };
-        
-        // load the file as array buffer
-        reader.readAsArrayBuffer(file);
-    }*/
+		// get list of dropped files (||fail silently)
+		var files = e.originalEvent.dataTransfer.files||[];
+		// amount of dropped files
+		var count = files.length;
+		
+		// One file at least neccessary to continue
+		if(count > 0){
+			
+		}
+	});
+	/*
+	function handleFiles(files, masterObj){
+		// handle only the first file (no multifile support) 
+		var file = files[0];
+		// create the reader to access the local file (note: browser have different security restrictions) 
+		var reader = new FileReader();
+		
+		// init the reader event handlers
+		reader.onload = function(e){
+			var arrayBuffer = e.target.result;
+			var arr = new Uint8Array(arrayBuffer);
+			// do something with array?
+		};
+		
+		// load the file as array buffer
+		reader.readAsArrayBuffer(file);
+	}*/
 	
-    function stopEvent(e){
-        e.stopPropagation();
-        e.preventDefault();
-    }
-    
+	function stopEvent(e){
+		e.stopPropagation();
+		e.preventDefault();
+	}
+	
 };

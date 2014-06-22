@@ -5,21 +5,21 @@ $.ajaxSetup({ cache: true });
 
 (function($) {
 	$.fn.$ = $.fn.find;
-    $.fn.attrs = function(){
-        var attrs = {}; 
+	$.fn.attrs = function(){
+		var attrs = {}; 
 
-        if(this.length){
-            $.each(this[0].attributes, function(index, attr){
+		if(this.length){
+			$.each(this[0].attributes, function(index, attr){
 				//IE lists unspecified attributes (must check for specified)
 				//in other browsers, specified will probably always be true for compatibility
 				if(attr.specified){
-                	attrs[attr.name.toLowerCase()] = attr.value;
+					attrs[attr.name.toLowerCase()] = attr.value;
 				}
-            }); 
-        }
+			}); 
+		}
 
-        return attrs;
-    };
+		return attrs;
+	};
 	$.fn.appendText = function(text){
 		return this.each(function(){
 			var textNode = document.createTextNode(text);
@@ -52,7 +52,7 @@ $.ajaxSetup({ cache: true });
  * all copies or substantial portions of the Software.
  */
 
-(function($){        
+(function($){
 	$.titleAlert = function(text, settings) {
 		// check if it currently flashing something, if so reset it
 		if ($.titleAlert._running)
