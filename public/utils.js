@@ -177,10 +177,10 @@ AudioMan.prototype.add = function(sounds){
 		}
 		$pool.on('canplay canplaythrough', function(){
 			this.canplay = true;
-			console.log("canplay");
+			//console.log("canplay");
 		}).on('error',function(){
 			this.cannotplay = true;
-			console.log("cannotplay");
+			//console.log("cannotplay");
 		});
 	}
 	return am;
@@ -192,7 +192,7 @@ AudioMan.prototype.play = function(s){
 	var $pool = am.pools[s];
 	for(var i=0; i<$pool.length; i++){
 		var audio = $pool[i];
-		console.log(audio.canplay);
+		//console.log(audio.canplay);
 		if(audio.canplay){//@TOSOish: make sure this doesn't stop it from ever playing any sounds
 			if(isPlaying(audio)){
 				continue;

@@ -87,7 +87,7 @@ function main(){
 			crypto.randomBytes(48, function(ex, buf){
 				publicKey = buf.toString('base64');
 				socket.emit("public-key",publicKey);
-				console.log("public-key",publicKey);
+				//console.log("public-key",publicKey);
 			});
 		};
 		generatePublicKey();
@@ -102,12 +102,12 @@ function main(){
 					});
 					delete online[user.uname];
 				}else{
-					console.log("debug: logout with no uname");
+					console.log("debug: logout with no uname heh um ok");
 				}
 				publicKey = null; //invalidate publicKey;
 			},
 			disconnect: function(){
-				console.log("debug: disconnect, uname="+user.uname);
+				//console.log("debug: disconnect, uname="+user.uname);
 				delete online[user.uname];
 				publicKey = null; //invalidate publicKey;			
 			},
@@ -265,20 +265,21 @@ function main(){
 			
 			data.from = user.uname;
 			data.time = +new Date();
+			var recipient = data.to;
 			
-			if(data.to.match(/^@bot-/)){
+			if(recipient.match(/^@bot-/)){
 				if(data.message.match(/ping/gmi)){
-					socket.emit("im",{from:data.to,message:"SAUASUHUHASUHASUH"});
+					socket.emit("im",{from:recipient,message:"SAUASUHUHASUHASUH"});
 				}else{
 					for(var i=0;i<3;i+=1+(Math.random()<0.5)){
 						socket.emit("im",{from:"@bot-"+i,message:Math.random()<0.01?"SAUASUHUHASUHASUH":"HELLO THERE HUMAN"});
 					}
 				}
-			}else if(data.to==="@cleverbot"){
+			}else if(recipient==="@cleverbot"){
 				bot.think(data.message,function(err,res){
-					socket.emit("im",{from:data.to,message:res||err});
+					socket.emit("im",{from:recipient,message:res||err});
 				});
-			}else if(data.to==="@feedback"){
+			}else if(recipient==="@feedback"){
 				fs.appendFile(
 					"FEEDBACK",
 					"\u2029[:"+data.from+"@"+data.time+":]\n"+data.message.replace(/\u2029/g,'')+"\n",
@@ -294,19 +295,19 @@ function main(){
 				socket.emit("im",{from:"@feedback",message:"Thanks for your feedback probably!"});
 			}else{
 				// Pass it on.
-				if(online[data.to]){
-					online[data.to].socket.emit('im', data);
-					//console.log(user.uname+' said "'+data.message+'" to '+data.to);
+				if(online[recipient]){
+					online[recipient].socket.emit('im', data);
+					//console.log(user.uname+' said "'+data.message+'" to '+recipient);
 				}else{
-					//console.log(user.uname+' tried to say "'+data.message+'" to '+data.to+', but '+data.to+" isn't online and logs aren't implemented. :(");
+					//console.log(user.uname+' tried to say "'+data.message+'" to '+recipient+', but '+recipient+" isn't online and logs aren't implemented. :(");
 				}
 				// Add the message to the log(s).
-				fs.exists('db/users/'+data.to,function(exists){
+				fs.exists('db/users/'+recipient,function(exists){
 					if(!exists){
-						console.log("user does not exist:",data.to);
+						console.log("user does not exist:",recipient);
 					}else{
 						fs.appendFile(
-							'db/users/'+data.to+"/"+data.from+".chat",
+							'db/users/'+recipient+"/"+data.from+".chat",
 							"\u2029[:"+data.from+"@"+data.time+":]\n"+data.message.replace(/\u2029/g,'')+"\n",
 							function(err){
 								if(err)console.error("log error!",err);

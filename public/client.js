@@ -104,18 +104,18 @@ $(function(){
 		//var creating = false;
 		var login = function(username, password, newAccount){
 			if(!publicKey){
-				alert("OMG no publicKey! :(((");
+				alert("OMG no publicKey! :((( Things are broken... problems connecting to server.. :(");
 			}
 			var u = {uname:username,pash:hash(password,username)};
-			console.log(newAccount?"create-account":"login",u);
 			socket.emit(newAccount?"create-account":"login",u);
+			//console.log(newAccount?"create-account":"login",u);
 		};
 		var logout = function(){
 			//visually log out (immediately)
 			_loggedOut();
 			//send log out message
-			console.log("SOCKET>EMIT(LOGOUT)");
 			socket.emit("logout");
+			console.log("logout");
 		};
 		socket.on("disconnect", function(what){
 			$body.addClass("disconnected");
@@ -128,7 +128,7 @@ $(function(){
 		});
 		socket.on("public-key", function(key){
 			publicKey = key;
-			console.log("public-key",publicKey);
+			//console.log("public-key",publicKey);
 		});
 		socket.on("login-failed", function(data){
 			/*if(data.message.match(/doesn't exist/)){
@@ -138,7 +138,7 @@ $(function(){
 			}
 			console.log(data.message,creating);*/
 			$err.text(data.message);
-			console.log("login-failed", data.message, $err);
+			console.log("login failed:", data.message);
 		});
 		socket.on("logged-out", function(data){
 			_loggedOut();
@@ -147,7 +147,7 @@ $(function(){
 			_loggedIn();
 			$err.empty();
 			$greeting.text("Hello, "+my.uname);
-			console.log("my settings: ",my.settings);
+			//console.log("my settings:", my.settings);
 		});
 		socket.on("someone-logged-in", function(u){
 			var $panel = chats[u.uname] || $ChatPanel(u, socket);
@@ -176,7 +176,7 @@ $(function(){
 		socket.on("im", function(data){
 			//recieved a message
 			if(chats[data.from]){
-				chats[data.from].addMessage(data);
+				chats[data.from].log(data.message);
 			}else{
 				console.log(data);
 			}

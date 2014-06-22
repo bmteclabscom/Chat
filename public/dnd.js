@@ -8,7 +8,7 @@ $(function(){
 	
 	$("body").on("dragenter dragover dragexit", function(e){
 		if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.hasfiles){
-			console.log(e.type,e.originalEvent.dataTransfer.files);
+			//console.log(e.type,e.originalEvent.dataTransfer.files);
 		}
 	}).on("drop", function drop(e){
 		if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files && e.originalEvent.dataTransfer.files.length){
@@ -25,9 +25,9 @@ function DnD($e,o){
 	
 	$e.on("dragenter dragover dragexit", function(e){
 		if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files && e.originalEvent.dataTransfer.files.length){
-			console.log(e.type,e.originalEvent.dataTransfer.files);
+			//console.log(e.type,e.originalEvent.dataTransfer.files);
 		}else{
-			console.log(e.type,"no files",e.originalEvent.dataTransfer.files);
+			//console.log(e.type,"no files",e.originalEvent.dataTransfer.files);
 		}
 	});
 	$e.on("drop", function drop(e){

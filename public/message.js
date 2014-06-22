@@ -34,8 +34,9 @@
 		},
 	};
 	
-	$Message = function(xmmlf, or, $xml){//(xmmlf === eXtensibe Message Markup Language Fragment)
-								//or an $XmlDoc jquery object
+	$Message = function(xmmlf){
+		//call with xmmlf (eXtensibe Message Markup Language Fragment)
+		//or an $XmlDoc jquery object
 		var $message = $("<div class='message bubble'/>");
 		
 		if(xmmlf.is/*a jquery object*/){
@@ -85,14 +86,14 @@
 	$MessageRow = function($msg){
 		return $("<div class='message-row'/>").append($msg||$());
 	};
+	
 	$MessageInput = function(){
-		var $mi = $("<div class='message-input bubble'/>");
+		var $mi = $("<div class='message-input-section bubble'/>");
 		var $ce = $("<div contenteditable class='message-input-input'/>").appendTo($mi);
 		$ce.on("keydown",function(e){
-			//console.log(e.shiftKey,e.keyCode);
 			if(e.keyCode===13 && !e.shiftKey){
 				e.preventDefault();
-				$ce.triggerHandler("send",getXMML($ce));
+				$mi.triggerHandler("send", getXMML($ce));
 				$ce.empty();
 			}
 		});
@@ -100,21 +101,21 @@
 		var $link = $("<img class='tb-item' title='Create Link' src='https://cdn1.iconfinder.com/data/icons/ledicons/link.png'/>");
 		var $emotes = $("<img class='tb-item' title='Emoticons Menu' src='/res/emotes/simple/happy.png'/>");
 		var $draw = $("<img class='tb-item' title='Pictochat Mode' src='http://www.digitalnintendo.com/images/misc/Pictochat/box.png' width=16 height=16/>");
-		var $speech = $("<input class='tb-item' title='Speech Input' x-webkit-speech/>");
+		/*var $speech = $("<input class='tb-item' title='Speech Input' x-webkit-speech/>");
 		if($speech[0].webkitSpeech){
-			/*$speech.css({
-				display: "inline-block",
-				width: 16,
-				height: 16,
-				border: 0,
-				background: "transparent"
-			});*/
+			//$speech.css({
+			//	display: "inline-block",
+			//	width: 16,
+			//	height: 16,
+			//	border: 0,
+			//	background: "transparent"
+			//});
 			$speech.on("webkitspeechchange", function(){
 				$ce.appendText(this.value);
 				this.value = "";
 			});
 			$tools.append($speech);
-		}
+		}*/
 		$tools.append($link,$draw,$emotes);
 		$tools.find(".tb-item").on("dragstart",function(e){
 			e.preventDefault();
@@ -133,6 +134,7 @@
 			}else if(n.nodeType == ELEMENT_NODE){
 				var nn = n.nodeName.toLowerCase();
 				if(nn === "a"){
+					//@TODO: short yt urls
 					var m = $n.attr("href").match(/^(?:https?)(?::\/\/)?(?:www\.)?youtube.com\/(?:watch\?v=|embed\/)([A-Za-z0-9\-]+)/);
 					if(m){
 						xmml += '<youtube vid="'+m[1]+'"/>';
@@ -144,10 +146,10 @@
 						return;
 					}
 				}else if(nn === "canvas"){
-					xmml += '<img src="'+$ch.toDataURL('image/png')+'"/>';
+					xmml += '<img src="'+$n.toDataURL('image/png')+'"/>';
 					return;
-				}else if(nn === "img" && $ch.data("e")){
-					xmml += '<emote e="'+$ch.data("e")+'"/>';
+				}else if(nn === "img" && $n.data("e")){
+					xmml += '<emote e="'+$n.data("e")+'"/>';
 					return;
 				}
 				xmml += "<"+nn;

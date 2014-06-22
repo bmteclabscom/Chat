@@ -4,13 +4,13 @@
 	-ms-user-select: none;
 	user-select: none;
 }
-input, textarea, .message-input, #login-error, footer, footer *, p {
+input, textarea, #login-error, footer, footer *, p {
 	-webkit-user-select: text;
 	-moz-user-select: text;
 	-ms-user-select: text;
 	user-select: text;
 }
-.message-input * {
+.message-input-section * {
 	-webkit-user-select: all;
 	-moz-user-select: all;
 	-ms-user-select: all;
@@ -311,17 +311,18 @@ footer a {
 .chat-panel *::-moz-selection { /* Firefox */
 	background: rgba(0,200,255,0.5);
 }
-.chat-panel {
-	display: table;
+.message-input-section {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
-.message-input {
-	display: table-row;
+.chat-log {
+	width: 100%;
+	height: 100%;
 }
-.message-input-input {
-	display: table-cell;
-}
-.message-input-tools {
-	display: table-cell;
+.message-input-input, .message-input-tools {
+	/*display: table-cell;*/
 }
 .message-input-tools .tb-item {
 	display: inline-block;

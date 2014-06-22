@@ -39,13 +39,14 @@ $ChatPanel = function(user, socket){
 	var $log = $("<div class='chat-log'/>");
 	var $input = $MessageInput();
 	
-	$cp.addMessage = function($msg){
-		$log.append($msg);
+	$cp.log = function(xmmlf){
+		$log.append($MessageRow($Message(xmmlf)));
 	};
 	$cp.append($log,$input);
-	$input.on("send",function(e,msg){
-		console.log(msg);
-		socket.emit("im",{to:user.uname,message:msg});
+	$input.on("send",function(e,xmmlf){
+		socket.emit("im",{to:user.uname, message:xmmlf});
+		$log.append($MessageRow($Message(xmmlf).addClass("from-me")));
+		//console.log(msg);
 	});
 	
 	return $cp;
