@@ -1,4 +1,4 @@
-
+/*
 
 console.log("Chat Server v0.0.1.1");
 var crypto = require('crypto');
@@ -215,3 +215,4 @@ function login(data, success, fail) {
 		}
 	});
 }
+*/

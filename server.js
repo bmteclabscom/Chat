@@ -8,15 +8,43 @@ Console commands:
 console.log("Chat Server v0.0.1.1");
 
 var fs = require('fs');
-if(!fs.existsSync){
-	console.log("No fs.existsSync? Upgrade Node.");
-	console.log(process.versions);
-	process.exit(1);
-}
-
-
-var webserver = require("./webserver")({some:function(s){maybe;}});
+var walk = require('walk');
+var http = require('http');
+var express = require('express');
+var directory = require('connect-directory');
+var extensionless = require('extensionless');
 var crypto = require('crypto');
+
+var public = __dirname + '/public';
+var ip = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || "127.0.0.1";
+var port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 8080;
+
+
+var app = express();
+app.use(extensionless(public, ["html","png","svg","gif"]));
+app.use(express.static(public));
+app.get('/emotes-list', function(req, res){
+	var walker = walk.walk('./public/res/emotes');
+	var emotes = [];
+	walker.on('file', function(dir, stat, next){
+		res.write(dir.replace("./public","")+"/"+stat.name+'\n');
+		next();
+	});
+	walker.on('end', function(){
+		res.end([
+			"http://i3.kym-cdn.com/photos/images/original/000/150/330/omnomnomnom.gif",
+			"http://31.media.tumblr.com/tumblr_lgyexi5xvo1qhofrso1_500.gif"
+		].join("\n"));
+	});
+});
+//app.use(directory(public));
+app.use(express.errorHandler());
+
+var server = http.Server(app);
+
+server.listen(port, ip);
+console.log('Server started at '+ip+':'+port);
+
 
 
 var mode = parseInt("770",8);
@@ -36,19 +64,19 @@ main();
 
 function main(){
 	
-	var io = require('socket.io').listen(2998, {secure: true});
+	var io = require('socket.io')(server);
 	
 	/*io.enable('browser client minification');
 	io.enable('browser client etag');
 	io.enable('browser client gzip');
-	io.set('log level', 1);*/
+	io.set('log level', 1);
 	io.set('transports', [
 		'websocket',
 		'flashsocket',
 		'htmlfile',
 		'xhr-polling',
 		'jsonp-polling'
-	]);
+	]);*/
 	
 	var bot = new require("cleverbot")();
 	var online = {};

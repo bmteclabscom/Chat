@@ -1,5 +1,5 @@
 
-var SERVER_URL = location.origin + ":2998";
+var SERVER_URL = location.origin;// + ":2998";
 var CONNECT_OPTIONS = {
 	'reconnect': true,
 	'reconnection delay': 1000,
@@ -138,6 +138,7 @@ $(function(){
 			}
 			console.log(data.message,creating);*/
 			$err.text(data.message);
+			console.log("login-failed", data.message, $err);
 		});
 		socket.on("logged-out", function(data){
 			_loggedOut();
